@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FreshTrack – Smart Inventory & Expiry Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--g:#159568;--gd:#0f7a55;--dk:#173B35;--bg:#F4F7F5;--warn:#F4B942;--card:#fff;--ink:#17302a;--mut:#62756e;--line:#dfe8e4;--red:#d64545;--redbg:#fbe9e9;--ylbg:#fdf2d9;--ylink:#7a5300;--grbg:#e2f4ec;--grink:#0d6b49;--redink:#a22d2d;--inp:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0e1a17;--card:#16251f;--ink:#e5f0ec;--mut:#98ada5;--line:#25382f;--redbg:#3a1d1d;--ylbg:#3a2f14;--ylink:#f4cf7a;--grbg:#173a2c;--grink:#6fdcae;--redink:#ff9d9d;--inp:#102019;--dk:#0c2420}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0e1a17;--card:#16251f;--ink:#e5f0ec;--mut:#98ada5;--line:#25382f;--redbg:#3a1d1d;--ylbg:#3a2f14;--ylink:#f4cf7a;--grbg:#173a2c;--grink:#6fdcae;--redink:#ff9d9d;--inp:#102019;--dk:#0c2420}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select{font:inherit;color:inherit}
+h1{font-size:26px;margin:0 0 4px;letter-spacing:-.02em}h2{font-size:17px;margin:0 0 12px}
+.mut{color:var(--mut)}.sm{font-size:13px}
+.shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+aside{background:var(--dk);color:#d6ebe3;padding:22px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:4px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;color:#fff;padding:0 8px 18px}
+.mark{width:30px;height:30px;border-radius:9px 9px 9px 2px;background:var(--g);display:grid;place-items:center}
+aside a{color:inherit;text-decoration:none;padding:10px 12px;border-radius:10px;font-weight:600}
+aside a:hover{background:rgba(255,255,255,.08)}aside a.on{background:var(--g);color:#fff}
+aside .sp{flex:1}
+main{padding:28px 32px 60px;max-width:1100px;width:100%}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:18px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:18px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;border-left:5px solid var(--g)}
+.stat b{display:block;font-size:30px;line-height:1.1;letter-spacing:-.02em}
+.stat.y{border-left-color:var(--warn)}.stat.r{border-left-color:var(--red)}
+.btn{background:var(--g);color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer}
+.btn:hover{background:var(--gd)}.btn.o{background:transparent;color:var(--ink);border:1px solid var(--line)}.btn.o:hover{background:var(--bg)}
+.btn.d{background:var(--red)}.btn.s{padding:6px 10px;font-size:13px}
+:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+label{display:block;font-weight:600;font-size:13px;margin:0 0 4px}
+input,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--inp)}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:640px}
+th{text-align:left;font-size:13px;color:var(--mut);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}tr:last-child td{border-bottom:0}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;white-space:nowrap}
+.expired{background:var(--redbg);color:var(--redink)}.soon{background:var(--ylbg);color:var(--ylink)}.safe{background:var(--grbg);color:var(--grink)}
+.low{background:var(--ylbg);color:var(--ylink)}
+.al{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.al:last-child{border:0}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.empty{padding:26px;text-align:center;color:var(--mut)}
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--ink);padding:22px;width:min(440px,92vw)}
+dialog::backdrop{background:rgba(10,25,20,.55)}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--dk);color:#fff;padding:10px 18px;border-radius:10px;font-weight:600;z-index:9}
+.auth{display:grid;grid-template-columns:1.1fr 1fr;min-height:100vh}
+.auth .l{background:var(--dk);color:#fff;padding:48px;display:flex;flex-direction:column;justify-content:center;gap:24px}
+.auth .l h1{font-size:40px;line-height:1.1;max-width:14ch}
+.batch{background:rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;max-width:340px;display:flex;flex-direction:column;gap:10px}
+.batch div{display:flex;justify-content:space-between;gap:12px;font-size:14px}
+.auth .r{display:flex;align-items:center;justify-content:center;padding:32px}
+.auth form{width:min(380px,100%)}.auth form>div{margin-bottom:14px}
+.err{color:var(--redink);font-weight:600;font-size:13px;min-height:20px}
+@media(max-width:800px){.shell{grid-template-columns:1fr}
+aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap;padding:10px;gap:2px}.brand{width:100%;padding:0 6px 6px}aside .sp{display:none}aside a{padding:8px 10px;font-size:14px}
+main{padding:18px 14px 50px}.auth{grid-template-columns:1fr}.auth .l{padding:28px}.auth .l h1{font-size:30px}}
+@media print{aside,.btn,.noprint{display:none!important}.shell{display:block}}
+</style>
+<style>
+
+/* FreshTrack chatbot additions */
+#ft-chat-toggle{position:fixed;right:24px;bottom:24px;z-index:10000;width:58px;height:58px;border:0;border-radius:50%;background:var(--g,#159568);color:#fff;font-size:25px;box-shadow:0 8px 24px #12382d40;cursor:pointer}
+#ft-chat-panel{position:fixed;right:24px;bottom:94px;z-index:10000;width:min(360px,calc(100vw - 32px));height:470px;max-height:calc(100vh - 125px);background:var(--card,#fff);color:var(--ink,#17302a);border:1px solid var(--line,#dfe8e4);border-radius:18px;box-shadow:0 16px 48px #102a2040;display:none;overflow:hidden;flex-direction:column}
+#ft-chat-panel.open{display:flex}
+.ft-chat-head{background:var(--gd,#0f7a55);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+.ft-chat-head strong{font-size:15px}.ft-chat-head small{display:block;opacity:.85;font-size:12px}
+#ft-chat-close{border:0;background:transparent;color:#fff;font-size:23px;cursor:pointer}
+#ft-chat-messages{padding:14px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:10px}
+.ft-msg{max-width:88%;padding:10px 12px;border-radius:13px;font-size:13px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.ft-msg.bot{background:var(--bg,#f4f7f5);align-self:flex-start;border-bottom-left-radius:4px}
+.ft-msg.user{background:var(--g,#159568);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.ft-chat-quick{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 10px}
+.ft-chat-quick button{border:1px solid var(--line,#dfe8e4);background:var(--card,#fff);color:var(--ink,#17302a);border-radius:20px;padding:6px 9px;font-size:11px;cursor:pointer}
+.ft-chat-form{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line,#dfe8e4)}
+#ft-chat-input{min-width:0;flex:1;border:1px solid var(--line,#dfe8e4);border-radius:20px;padding:10px 12px;background:var(--inp,#fff);color:var(--ink,#17302a);font-size:13px}
+#ft-chat-send{border:0;border-radius:20px;background:var(--g,#159568);color:#fff;padding:0 14px;font-weight:700;cursor:pointer}
+@media(max-width:480px){#ft-chat-toggle{right:16px;bottom:16px}#ft-chat-panel{right:12px;bottom:84px}}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<dialog id="dlg"></dialog>
+<script>
+const K="freshtrack_v1";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const inDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return iso(d)};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const inr=n=>"₹"+Number(n).toLocaleString("en-IN",{maximumFractionDigits:0});
+let S;
+try{S=JSON.parse(localStorage.getItem(K)||"null")}catch(e){S=null}
+if(!S)S={user:null,in:false,products:[],set:{win:30,lowOn:true}};
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+
+function sample(){const t=iso(new Date());const P=(n,c,p,m,b)=>({id:uid(),n,c,p,m,b:b.map(([q,d])=>({q,e:inDays(d),a:t}))});
+return[P("Milk (500 ml)","Dairy",28,15,[[20,3],[30,8]]),P("Bread","Bakery",35,10,[[12,15]]),P("Basmati Rice (1 kg)","Grocery",95,20,[[8,90]]),
+P("Orange Juice","Beverages",60,12,[[14,-1],[20,45]]),P("Paracetamol Strip","Pharmacy",18,25,[[60,240]]),P("Curd (400 g)","Dairy",30,10,[[25,5]]),P("Biscuits","Snacks",20,30,[[100,120]])]}
+
+/* ---------- core logic ---------- */
+function daysLeft(d){const t=new Date();t.setHours(0,0,0,0);return Math.ceil((new Date(d+"T00:00:00")-t)/864e5)}
+function expiryStatus(d){const n=daysLeft(d);return n<0?"expired":n<=S.set.win?"soon":"safe"}
+const LBL={expired:"Expired",soon:"Expiring soon",safe:"Safe"};
+const total=p=>p.b.reduce((a,x)=>a+x.q,0);
+const isLow=p=>total(p)<=p.m;
+function worst(p){const r=p.b.map(x=>expiryStatus(x.e));return r.includes("expired")?"expired":r.includes("soon")?"soon":"safe"}
+const nextExp=p=>p.b.length?p.b.map(x=>x.e).sort()[0]:null;
+const pill=s=>`<span class="pill ${s}">${LBL[s]}</span>`;
+function when(d){const n=daysLeft(d);return n<0?`${-n} day${n==-1?"":"s"} ago`:n==0?"today":`in ${n} day${n==1?"":"s"}`}
+function batches(){return S.products.flatMap(p=>p.b.map(b=>({p,b,s:expiryStatus(b.e),n:daysLeft(b.e)})))}
+
+/* ---------- ui helpers ---------- */
+function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
+function modal(h){const d=$("#dlg");d.innerHTML=h;d.showModal()}
+const closeM=()=>$("#dlg").close();
+const NAV=[["dashboard","Dashboard"],["products","Products"],["add","Add product"],["expiry","Expiry"],["reports","Reports"],["settings","Settings"]];
+function shell(page,body){return `<div class="shell"><aside><div class="brand"><span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M5 19c0-9 5-14 14-14 0 9-5 14-14 14zM5 19l8-8"/></svg></span>FreshTrack</div>
+${NAV.map(([h,l])=>`<a href="#${h}" class="${h==page?"on":""}">${l}</a>`).join("")}<span class="sp"></span><a href="#logout">Log out</a></aside><main>${body}</main></div>`}
+
+/* ---------- pages ---------- */
+function authView(reg){return `<div class="auth"><div class="l"><div class="brand" style="padding:0"><span class="mark"></span>FreshTrack</div>
+<h1>Know what expires before it does.</h1><div class="batch" aria-hidden="true"><div><span>Milk · batch 1</span><span class="pill expired">3 days</span></div><div><span>Milk · batch 2</span><span class="pill soon">8 days</span></div><div><span>Rice · 1 kg</span><span class="pill safe">90 days</span></div></div>
+<p class="mut" style="color:#a9cfc2;max-width:38ch;margin:0">Track every batch, catch low stock early and cut the cost of expired products.</p></div>
+<div class="r"><form id="af"><h1>${reg?"Create your shop account":"Welcome back"}</h1><p class="mut" style="margin:0 0 18px">${reg?"Set up FreshTrack for your shop.":"Log in to manage your inventory."}</p>
+${reg?`<div><label for="sn">Shop name</label><input id="sn" required maxlength="60"></div>`:""}
+<div><label for="em">Email</label><input id="em" type="email" required value="${reg?"":"demo@freshtrack.in"}"></div>
+<div><label for="pw">Password</label><input id="pw" type="password" required minlength="6" value="${reg?"":"demo123"}"></div>
+${reg?`<div><label style="display:flex;gap:8px;align-items:center;font-weight:500"><input id="sm" type="checkbox" checked style="width:auto"> Load sample products</label></div>`:""}
+<div class="err" id="er"></div><button class="btn" style="width:100%">${reg?"Create account":"Log in"}</button>
+<p class="sm mut">${reg?`Have an account? <a href="#login">Log in</a>`:`New shop? <a href="#register">Create an account</a> · Demo login is filled in.`}</p></form></div></div>`}
+
+function dashboard(){const bs=batches(),ex=bs.filter(x=>x.s=="expired"),so=bs.filter(x=>x.s=="soon"),lo=S.products.filter(isLow);
+const al=[...ex,...so].sort((a,b)=>a.n-b.n).slice(0,6).map(x=>`<div class="al"><span><b>${esc(x.p.n)}</b> <span class="mut sm">· ${x.b.q} units · ${when(x.b.e)}</span></span>${pill(x.s)}</div>`)
+.concat(S.set.lowOn?lo.slice(0,4).map(p=>`<div class="al"><span><b>${esc(p.n)}</b> <span class="mut sm">· ${total(p)} left, minimum ${p.m}</span></span><span class="pill low">Low stock</span></div>`):[]).join("");
+return shell("dashboard",`<div class="head"><div><h1>Welcome back, ${esc(S.user.shop)}</h1><span class="mut">Here is how your stock looks today.</span></div><a href="#add" class="btn" style="text-decoration:none">Add product</a></div>
+<div class="stats"><div class="stat"><b>${S.products.length}</b><span class="mut sm">Products</span></div><div class="stat"><b>${S.products.reduce((a,p)=>a+total(p),0)}</b><span class="mut sm">Stock units</span></div>
+<div class="stat y"><b>${so.length}</b><span class="mut sm">Batches expiring soon</span></div><div class="stat r"><b>${ex.length}</b><span class="mut sm">Expired batches</span></div><div class="stat y"><b>${lo.length}</b><span class="mut sm">Low-stock products</span></div></div>
+<div class="card"><h2>Recent alerts</h2>${al||`<div class="empty">No alerts. Everything is fresh and in stock.</div>`}</div>`)}
+
+function productRows(q){const l=S.products.filter(p=>(p.n+p.c).toLowerCase().includes(q.toLowerCase()));
+return l.length?l.map(p=>{const ne=nextExp(p);return `<tr><td><b>${esc(p.n)}</b></td><td>${esc(p.c)}</td><td>${inr(p.p)}</td><td>${total(p)} ${isLow(p)?`<span class="pill low">Low stock</span>`:""}</td><td>${ne?esc(ne):"–"}</td><td>${p.b.length?pill(worst(p)):"–"}</td>
+<td><div class="acts"><button class="btn o s" data-a="batch" data-id="${p.id}">+ Batch</button><button class="btn o s" data-a="edit" data-id="${p.id}">Edit</button><button class="btn d s" data-a="del" data-id="${p.id}">Delete</button></div></td></tr>`}).join("")
+:`<tr><td colspan="7"><div class="empty">No products found. Add your first product to start tracking.</div></td></tr>`}
+function products(){return shell("products",`<div class="head"><div><h1>Products</h1><span class="mut">Search, edit and manage your inventory.</span></div><a href="#add" class="btn" style="text-decoration:none">Add product</a></div>
+<div class="card"><label for="q" class="sm">Search by name or category</label><input id="q" placeholder="Try “milk” or “dairy”" style="max-width:360px;margin-bottom:14px"><div class="tw"><table><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Next expiry</th><th>Status</th><th>Actions</th></tr></thead><tbody id="rows">${productRows("")}</tbody></table></div></div>`)}
+
+const CATS=["Dairy","Bakery","Grocery","Beverages","Snacks","Pharmacy","Other"];
+function addPage(){return shell("add",`<div class="head"><div><h1>Add product</h1><span class="mut">Adding a name that already exists creates a new batch for it.</span></div></div>
+<form class="card" id="pf"><div class="fg"><div><label for="n">Product name</label><input id="n" required maxlength="80"></div>
+<div><label for="c">Category</label><select id="c">${CATS.map(c=>`<option>${c}</option>`).join("")}</select></div>
+<div><label for="p">Price (₹)</label><input id="p" type="number" min="0" step="0.5" required></div>
+<div><label for="m">Minimum stock</label><input id="m" type="number" min="0" required value="10"></div>
+<div><label for="q">Quantity received</label><input id="q" type="number" min="1" required></div>
+<div><label for="e">Expiry date</label><input id="e" type="date" required></div></div><button class="btn">Save product</button></form>`)}
+
+function expiry(){const bs=batches();const sec=(t,s,l)=>`<div class="card"><h2>${t} (${l.length})</h2>${l.length?l.map(x=>`<div class="al"><span><b>${esc(x.p.n)}</b> <span class="mut sm">· ${x.b.q} units · ${esc(x.b.e)} · ${when(x.b.e)}</span></span><span class="acts">${pill(s)}<button class="btn o s" data-a="rm" data-id="${x.p.id}" data-e="${x.b.e}" data-q="${x.b.q}">Remove batch</button></span></div>`).join(""):`<div class="empty">Nothing here.</div>`}</div>`;
+const f=s=>bs.filter(x=>x.s==s).sort((a,b)=>a.n-b.n);
+return shell("expiry",`<div class="head"><div><h1>Expiry alerts</h1><span class="mut">Checked batch by batch. Alert window: ${S.set.win} days.</span></div></div>${sec("Already expired","expired",f("expired"))}${sec("Expiring within "+S.set.win+" days","soon",f("soon"))}`)}
+
+function reports(){const bs=batches(),val=l=>l.reduce((a,x)=>a+x.b.q*x.p.p,0),ex=bs.filter(x=>x.s=="expired"),so=bs.filter(x=>x.s=="soon");
+const cats={};S.products.forEach(p=>{const c=cats[p.c]||(cats[p.c]={n:0,u:0,v:0});c.n++;c.u+=total(p);c.v+=total(p)*p.p});
+return shell("reports",`<div class="head"><div><h1>Reports</h1><span class="mut">Stock summary and estimated losses.</span></div><button class="btn o noprint" onclick="print()">Print report</button></div>
+<div class="stats"><div class="stat"><b>${inr(val(bs))}</b><span class="mut sm">Total stock value</span></div><div class="stat r"><b>${inr(val(ex))}</b><span class="mut sm">Value of expired stock</span></div><div class="stat y"><b>${inr(val(so))}</b><span class="mut sm">Value at risk (expiring soon)</span></div></div>
+<div class="card"><h2>Stock by category</h2><div class="tw"><table><thead><tr><th>Category</th><th>Products</th><th>Units</th><th>Value</th></tr></thead><tbody>${Object.keys(cats).map(k=>`<tr><td>${esc(k)}</td><td>${cats[k].n}</td><td>${cats[k].u}</td><td>${inr(cats[k].v)}</td></tr>`).join("")||`<tr><td colspan="4"><div class="empty">Add products to see a summary.</div></td></tr>`}</tbody></table></div></div>
+<p class="sm mut">Values are estimates based on the prices and batch details you entered.</p>`)}
+
+function settings(){return shell("settings",`<div class="head"><div><h1>Settings</h1><span class="mut">Shop details and alert preferences.</span></div></div>
+<form class="card" id="sf"><div class="fg"><div><label for="sn">Shop name</label><input id="sn" required value="${esc(S.user.shop)}"></div><div><label>Email</label><input value="${esc(S.user.email)}" disabled></div>
+<div><label for="w">Expiry alert window</label><select id="w">${[7,15,30,60].map(d=>`<option value="${d}" ${d==S.set.win?"selected":""}>${d} days</option>`).join("")}</select></div>
+<div><label for="lo">Low-stock alerts</label><select id="lo"><option value="1" ${S.set.lowOn?"selected":""}>On</option><option value="0" ${S.set.lowOn?"":"selected"}>Off</option></select></div></div>
+<div class="acts"><button class="btn">Save settings</button><button type="button" class="btn o" data-a="sample">Load sample products</button><button type="button" class="btn d" data-a="wipe">Delete all data</button></div></form>`)}
+
+/* ---------- router ---------- */
+const PAGES={dashboard,products,add:addPage,expiry,reports,settings};
+function route(){let h=(location.hash||"#dashboard").slice(1);
+if(h=="logout"){S.in=false;save();location.hash="#login";return}
+if(!S.in&&h!="register")h="login";if(S.in&&(h=="login"||h=="register"))h="dashboard";
+if(!S.in){$("#app").innerHTML=authView(h=="register");bindAuth(h=="register");return}
+$("#app").innerHTML=(PAGES[h]||dashboard)();
+if(h=="products")$("#q").oninput=e=>$("#rows").innerHTML=productRows(e.target.value);
+if(h=="add")$("#pf").onsubmit=addSubmit;
+if(h=="settings")$("#sf").onsubmit=e=>{e.preventDefault();S.user.shop=$("#sn").value.trim();S.set.win=+$("#w").value;S.set.lowOn=$("#lo").value=="1";save();toast("Settings saved");route()};
+scrollTo(0,0)}
+addEventListener("hashchange",route);
+
+function bindAuth(reg){$("#af").onsubmit=e=>{e.preventDefault();const em=$("#em").value.trim().toLowerCase(),pw=$("#pw").value;
+if(reg){S.user={shop:$("#sn").value.trim(),email:em,pw};S.products=$("#sm").checked?sample():[];S.in=true;save();location.hash="#dashboard";route();return}
+if(!S.user&&em=="demo@freshtrack.in"&&pw=="demo123"){S.user={shop:"Green Basket Store",email:em,pw};S.products=sample()}
+if(S.user&&S.user.email==em&&S.user.pw==pw){S.in=true;save();location.hash="#dashboard";route()}else $("#er").textContent="Email or password is incorrect."}}
+
+function addSubmit(e){e.preventDefault();const n=$("#n").value.trim(),b={q:+$("#q").value,e:$("#e").value,a:iso(new Date())};
+let p=S.products.find(x=>x.n.toLowerCase()==n.toLowerCase());
+if(p){p.b.push(b);p.p=+$("#p").value;p.m=+$("#m").value}else S.products.push({id:uid(),n,c:$("#c").value,p:+$("#p").value,m:+$("#m").value,b:[b]});
+save();toast(p?"Batch added to "+n:"Product saved");location.hash="#products"}
+
+/* ---------- actions (edit, batch, delete, remove) ---------- */
+document.addEventListener("click",e=>{const t=e.target.closest("[data-a]");if(!t)return;const a=t.dataset.a,p=S.products.find(x=>x.id==t.dataset.id);
+if(a=="del"&&confirm("Delete “"+p.n+"” and all its batches?")){S.products=S.products.filter(x=>x!=p);save();toast("Product deleted");route()}
+if(a=="edit")modal(`<h2>Edit product</h2><form id="mf"><div class="fg"><div><label>Name</label><input id="mn" required value="${esc(p.n)}"></div><div><label>Category</label><select id="mc">${CATS.map(c=>`<option ${c==p.c?"selected":""}>${c}</option>`).join("")}</select></div><div><label>Price (₹)</label><input id="mp" type="number" min="0" step="0.5" required value="${p.p}"></div><div><label>Minimum stock</label><input id="mm" type="number" min="0" required value="${p.m}"></div></div><div class="acts"><button class="btn">Save changes</button><button type="button" class="btn o" onclick="closeM()">Cancel</button></div></form>`),
+$("#mf").onsubmit=ev=>{ev.preventDefault();p.n=$("#mn").value.trim();p.c=$("#mc").value;p.p=+$("#mp").value;p.m=+$("#mm").value;save();closeM();toast("Product updated");route()};
+if(a=="batch")modal(`<h2>Add batch · ${esc(p.n)}</h2><form id="mf"><div class="fg"><div><label>Quantity</label><input id="bq" type="number" min="1" required></div><div><label>Expiry date</label><input id="be" type="date" required></div></div><div class="acts"><button class="btn">Add batch</button><button type="button" class="btn o" onclick="closeM()">Cancel</button></div></form>`),
+$("#mf").onsubmit=ev=>{ev.preventDefault();p.b.push({q:+$("#bq").value,e:$("#be").value,a:iso(new Date())});save();closeM();toast("Batch added");route()};
+if(a=="rm"&&confirm("Remove this batch from stock?")){const i=p.b.findIndex(x=>x.e==t.dataset.e&&x.q==+t.dataset.q);if(i>-1)p.b.splice(i,1);save();toast("Batch removed");route()}
+if(a=="sample"){S.products=sample();save();toast("Sample products loaded");route()}
+if(a=="wipe"&&confirm("Delete all products? This cannot be undone.")){S.products=[];save();toast("All products deleted");route()}});
+
+route();
+</script>
+
+<!-- FreshTrack chatbot additions -->
+<button id="ft-chat-toggle" type="button" aria-label="Open FreshTrack help chat" title="FreshTrack Help">💬</button>
+<section id="ft-chat-panel" aria-label="FreshTrack chatbot" aria-live="polite">
+  <div class="ft-chat-head">
+    <div><strong>FreshTrack Assistant</strong><small>Ask me about your inventory</small></div>
+    <button id="ft-chat-close" type="button" aria-label="Close chat">×</button>
+  </div>
+  <div id="ft-chat-messages">
+    <div class="ft-msg bot">Hello! 👋 I’m the FreshTrack Assistant. I can help you use the inventory and expiry management website. What would you like to know?</div>
+  </div>
+  <div class="ft-chat-quick">
+    <button type="button" data-question="How do I add a product?">Add product</button>
+    <button type="button" data-question="How do expiry alerts work?">Expiry alerts</button>
+    <button type="button" data-question="How do I check low stock?">Low stock</button>
+    <button type="button" data-question="How do I view reports?">Reports</button>
+  </div>
+  <form class="ft-chat-form" id="ft-chat-form">
+    <input id="ft-chat-input" type="text" placeholder="Type your question..." autocomplete="off" aria-label="Your question">
+    <button id="ft-chat-send" type="submit">Send</button>
+  </form>
+</section>
+<script>
+(function(){
+  const toggle=document.getElementById('ft-chat-toggle');
+  const panel=document.getElementById('ft-chat-panel');
+  const close=document.getElementById('ft-chat-close');
+  const messages=document.getElementById('ft-chat-messages');
+  const form=document.getElementById('ft-chat-form');
+  const input=document.getElementById('ft-chat-input');
+
+  if(!toggle||!panel||!close||!messages||!form||!input)return;
+
+  function addMessage(text,who){
+    const el=document.createElement('div');
+    el.className='ft-msg '+who;
+    el.textContent=text;
+    messages.appendChild(el);
+    messages.scrollTop=messages.scrollHeight;
+  }
+
+  function answer(question){
+    const q=question.toLowerCase();
+    if(/hello|hi|hey|good morning|good evening/.test(q))
+      return 'Hello! 😊 I can guide you through products, batches, expiry alerts, low stock, reports and settings.';
+    if(/add|new product|create product/.test(q))
+      return 'To add stock: open “Add product”, enter the product name, category, price, minimum stock, quantity received and expiry date, then select “Save product”. If the product already exists, FreshTrack adds the quantity as a new batch.';
+    if(/batch/.test(q))
+      return 'A batch is a separate quantity of the same product with its own expiry date. Open “Products” and select “+ Batch” beside the product, then enter the quantity and expiry date.';
+    if(/expir|expire|expired/.test(q))
+      return 'Open “Expiry” to see expired batches and batches expiring soon. The alert window can be changed in “Settings” to 7, 15, 30 or 60 days.';
+    if(/low stock|minimum stock|stock alert/.test(q))
+      return 'FreshTrack marks a product as low stock when its total quantity is at or below its minimum stock level. You can change the minimum stock while adding or editing a product, and switch low-stock alerts on or off in “Settings”.';
+    if(/report|value|loss|print/.test(q))
+      return 'Open “Reports” to view total stock value, expired stock value, value at risk and stock grouped by category. You can also use “Print report” to print the summary.';
+    if(/edit|update/.test(q))
+      return 'Open “Products” and select “Edit” beside the product. You can update its name, category, price and minimum stock level.';
+    if(/delete|remove/.test(q))
+      return 'To delete a product, open “Products” and select “Delete”. To remove only one batch, open “Expiry” and select “Remove batch”. Please confirm carefully because deleted data cannot be restored.';
+    if(/setting|alert window|shop name/.test(q))
+      return 'Open “Settings” to update your shop name, choose the expiry alert window (7, 15, 30 or 60 days), and turn low-stock alerts on or off.';
+    if(/login|password|account|register/.test(q))
+      return 'Use the login page to sign in, or choose “Create an account” to register your shop. The demo login shown by this sample website is demo@freshtrack.in with password demo123.';
+    if(/dashboard|home|summary/.test(q))
+      return 'The Dashboard gives you a quick summary of products, stock units, batches expiring soon, expired batches and low-stock products. It also shows recent alerts.';
+    if(/thank/.test(q))
+      return 'You’re welcome! Happy stock tracking. 🌱';
+    return 'I can help with adding products, managing batches, expiry alerts, low-stock alerts, reports, settings and login. Try asking “How do I add a product?”';
+  }
+
+  function send(text){
+    const value=(text||'').trim();
+    if(!value)return;
+    addMessage(value,'user');
+    addMessage(answer(value),'bot');
+  }
+
+  toggle.addEventListener('click',function(){
+    panel.classList.toggle('open');
+    if(panel.classList.contains('open'))input.focus();
+  });
+  close.addEventListener('click',function(){panel.classList.remove('open');});
+  form.addEventListener('submit',function(event){
+    event.preventDefault();
+    send(input.value);
+    input.value='';
+    input.focus();
+  });
+  panel.querySelectorAll('[data-question]').forEach(function(button){
+    button.addEventListener('click',function(){send(button.dataset.question);});
+  });
+})();
+</script>
+
+</body>
+</html>
